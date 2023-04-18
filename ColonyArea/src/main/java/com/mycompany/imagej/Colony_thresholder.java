@@ -145,7 +145,7 @@ public class Colony_thresholder {
 	}
 	
 	/**
-	 *  Image processing
+	 *  Main method : Image processing
 	 */
 	public void processingColony() {
 		// Run a Gaussian Blur filter on the image to blur out the “speckle”
@@ -467,8 +467,8 @@ public class Colony_thresholder {
 	
 	/**
 	 *  Analyze/count colonies : tamisage (taille, circularite)
-	 *  
-	 *  Shape/location measurements to collect for each segmented colony 
+	 *  Shape/location measurements to collect for each segmented colony
+	 *  Add the Feret's ratio measurement as a new column:  
 	 */
 	public void analyzeParticles(ImagePlus watershed) {
 		
@@ -496,10 +496,24 @@ public class Colony_thresholder {
 		
 		// Add the Feret's ratio measurement as a new column
 		for (int row=0; row<results.size(); row++) {
-			double ratio = results.getValue("MinFeret", row) /
-					results.getValue("Feret", row);
+			// Feret ratio
+			double ratio = 
+				results.getValue("MinFeret", row) /	results.getValue("Feret", row);
 		    results.setValue("FeretRatio", row, ratio);
+		    // compactness
+		    double perimeter = results.getValue(ResultsTable.PERIMETER, row);
+		    double compactness = 
+				(4*Math.PI*results.getValue("Area", row)) /	(perimeter * perimeter);
+			results.setValue("Compactness", row, compactness);		    
 		}
+		// Add the compactness measurement as a new column
+		/*
+		for (int row=0; row<results.size(); row++) {
+			double compactness = 
+				(4*Math.PI*results.getValue("Area", row)) /	results.getValue("Perimeter", row);
+		    results.setValue("Compactness", row, compactness);
+		}
+		*/
 		results.updateResults();
 		
 		//results.save("/Desktop/test.csv");
